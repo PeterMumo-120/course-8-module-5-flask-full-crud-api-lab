@@ -36,3 +36,4 @@ def test_delete_event_not_found():
     client = app.test_client()
     response = client.delete("/events/99")
     assert response.status_code == 404
+    
