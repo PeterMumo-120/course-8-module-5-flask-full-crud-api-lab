@@ -16,7 +16,7 @@ In this lab, you will build a **Full CRUD API** to manage a list of events. The 
 - Update existing events using `PATCH`
 - Delete events using `DELETE`
 
-You’ll simulate database-like behavior with in-memory Python class objects and respond to all client requests with properly formatted JSON and appropriate status codes.
+You'll simulate database-like behavior with in-memory Python class objects and respond to all client requests with properly formatted JSON and appropriate status codes.
 
 This lab reinforces essential backend development skills including route design, data mutation, error handling, and RESTful conventions.
 
@@ -58,7 +58,7 @@ pip install flask
 
 ### Task 1: Define the Problem
 
-You’re building a basic event management API. It should:
+You're building a basic event management API. It should:
 
 - Accept event creation via `POST /events`
 - Allow updating event titles via `PATCH /events/<id>`
