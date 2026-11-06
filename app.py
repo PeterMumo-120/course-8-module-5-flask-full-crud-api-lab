@@ -1,9 +1,8 @@
-
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-# Simulated data
+
 class Event:
     def __init__(self, id, title):
         self.id = id
@@ -12,65 +11,52 @@ class Event:
     def to_dict(self):
         return {"id": self.id, "title": self.title}
 
+
 events = [
     Event(1, "Tech Meetup"),
-    Event(2, "Python Workshop")
+    Event(2, "Python Workshop"),
 ]
 
-# POST /events - Create a new event from JSON input
-@app.route('/events', methods=['POST'])
+
+@app.route("/events", methods=["POST"])
 def create_event():
-    """Create a new event.
+    data = request.get_json(silent=True) or {}
+    title = data.get("title")
 
-    Expects JSON like: { "title": "Hackathon" }
-    Returns the created event and a 201 status code.
-    """
-    data = request.get_json()
-    if not data or 'title' not in data:
-        return jsonify({"error": "Title is required"}), 400
+    if not isinstance(title, str) or not title.strip():
+        return jsonify({"error": "A title is required"}), 400
 
-    # Generate a new ID (simple in-memory strategy)
-    new_id = max((e.id for e in events), default=0) + 1
-    new_event = Event(new_id, data['title'])
-    events.append(new_event)
+    new_id = max((event.id for event in events), default=0) + 1
+    event = Event(new_id, title.strip())
+    events.append(event)
 
-    return jsonify(new_event.to_dict()), 201
+    return jsonify(event.to_dict()), 201
 
 
-# PATCH /events/<id> - Update the title of an event
-@app.route('/events/<int:event_id>', methods=['PATCH'])
+@app.route("/events/<int:event_id>", methods=["PATCH"])
 def update_event(event_id):
-    """Update an existing event's title.
+    data = request.get_json(silent=True) or {}
+    title = data.get("title")
 
-    Expects JSON like: { "title": "New Title" }
-    Returns the updated event or 404 if not found.
-    """
-    data = request.get_json()
-    if not data or 'title' not in data:
-        return jsonify({"error": "Title is required for update"}), 400
+    if not isinstance(title, str) or not title.strip():
+        return jsonify({"error": "A title is required"}), 400
 
-    event = next((e for e in events if e.id == event_id), None)
-    if not event:
-        return jsonify({"error": "Event not found"}), 404
+    for event in events:
+        if event.id == event_id:
+            event.title = title.strip()
+            return jsonify(event.to_dict()), 200
 
-    event.title = data['title']
-    return jsonify(event.to_dict()), 200
+    return jsonify({"error": "Event not found"}), 404
 
 
-# DELETE /events/<id> - Remove an event from the list
-@app.route('/events/<int:event_id>', methods=['DELETE'])
+@app.route("/events/<int:event_id>", methods=["DELETE"])
 def delete_event(event_id):
-    """Delete an event by id.
+    for event in events:
+        if event.id == event_id:
+            events.remove(event)
+            return "", 204
 
-    Returns a 200 with a confirmation message, or 404 if the event does not exist.
-    """
-    global events
-    event = next((e for e in events if e.id == event_id), None)
-    if not event:
-        return jsonify({"error": "Event not found"}), 404
-
-    events = [e for e in events if e.id != event_id]
-    return jsonify({"message": "Event deleted"}), 200
+    return jsonify({"error": "Event not found"}), 404
 
 
 if __name__ == "__main__":
